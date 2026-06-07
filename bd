@@ -1,0 +1,70 @@
+sql
+http://localhost/banketam/login.php войти
+http://localhost/banketam/admin.php сайт админа
+http://localhost/banketam/index.php история заявок
+http://localhost/banketam/create_order.php сделать заявку
+CREATE DATABASE IF NOT EXISTS banketam_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE banketam_db;
+
+СОЗДАНИЕ БД
+
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fio VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role_id INT NOT NULL,
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+CREATE TABLE premises (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    premise_id INT NOT NULL,
+    event_date DATETIME NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    status ENUM('Новая', 'Банкет назначен', 'Банкет завершен') DEFAULT 'Новая',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (premise_id) REFERENCES premises(id)
+);
+
+INSERT INTO roles (name) VALUES ('Пользователь'), ('Администратор');
+INSERT INTO premises (name) VALUES ('Зал'), ('Ресторан'), ('Летняя веранда'), ('Закрытая веранда');
+
+СОЗДАНИЕ АДМИНИСТРАТОРА
+
+INSERT INTO users (fio, phone, email, login, password, role_id) 
+VALUES ('Главный Администратор', '88005553535', 'admin@banketam.net', 'Admin26', '$2y$10$3g0b7C0O4zG9ZlW9H16vneexyB10EshB/b7OAnZkH9sYhEaM8Lde.', 2)
+ON DUPLICATE KEY UPDATE login='Admin26';
+
+СОЗДАНИЕ ОТЗЫВОВ 
+
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+
+
+
+
+
+
